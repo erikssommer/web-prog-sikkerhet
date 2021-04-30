@@ -3,12 +3,12 @@ package com.eriksommer.webprogsikkerhet.repository;
 import com.eriksommer.webprogsikkerhet.model.Bil;
 import com.eriksommer.webprogsikkerhet.model.Bruker;
 import com.eriksommer.webprogsikkerhet.model.Motorvogn;
+import com.eriksommer.webprogsikkerhet.service.Kryptering;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +16,9 @@ import java.util.List;
 @Repository
 @SuppressWarnings("all")
 public class MotorvognRepository {
+
+    @Autowired
+    Kryptering kryptering;
 
     @Autowired
     private JdbcTemplate db;
@@ -103,7 +106,7 @@ public class MotorvognRepository {
             List<Bruker> list = db.query(sql, new BeanPropertyRowMapper(Bruker.class), brukernavn);
 
             if (list != null){
-                if (sjekkPassord(passord, list.get(0).getPassord())){
+                if (kryptering.sjekkPassord(passord, list.get(0).getPassord())){
                     return true;
                 }
             }
@@ -114,29 +117,17 @@ public class MotorvognRepository {
         }
     }
 
-    public boolean sjekkPassord(String passord, String hashPassword){
-        BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder(15);
-
-        return bCrypt.matches(passord, hashPassword);
-    }
-
     public boolean registrerBruker(Bruker bruker){
         String sql = "INSERT INTO Bruker (brukernavn, passord) VALUES (?,?)";
 
         try {
-            String kryptertPassord = krypterPassord(bruker.getPassord());
+            String kryptertPassord = kryptering.krypterPassord(bruker.getPassord());
             db.update(sql, bruker.getBrukernavn(), kryptertPassord);
             return true;
         }catch (Exception e) {
             logger.error("Kunne ikke lagre bruker");
             return false;
         }
-    }
-
-    private String krypterPassord(String passord){
-        BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder(15);
-
-        return bCrypt.encode(passord);
     }
 
     public boolean krypterAllePassord(){
@@ -147,7 +138,7 @@ public class MotorvognRepository {
             List<Bruker> list = db.query(sql, new BeanPropertyRowMapper(Bruker.class));
 
             for (Bruker bruker : list) {
-                kryptertPassord = krypterPassord(bruker.getPassord());
+                kryptertPassord = kryptering.krypterPassord(bruker.getPassord());
 
                 sql = "UPDATE Bruker SET passord=? WHERE id=?";
                 db.update(sql, kryptertPassord, bruker.getId());
