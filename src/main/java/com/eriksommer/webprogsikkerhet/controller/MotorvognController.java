@@ -103,8 +103,8 @@ public class MotorvognController {
     }
 
     @GetMapping("/loggInn")
-    public boolean loggInn(String brukernavn, String passord){
-        if (rep.loggInn(brukernavn, passord)){
+    public boolean loggInn(String brukernavn, String passord) {
+        if (rep.loggInn(brukernavn, passord)) {
             session.setAttribute("loggetInn", true);
             return true;
         } else {
@@ -113,24 +113,16 @@ public class MotorvognController {
     }
 
     @PostMapping("/nybruker")
-    public void registrerBruker(Bruker bruker, HttpServletResponse res) throws IOException{
-        if (!rep.registrerBruker(bruker)){
+    public void registrerBruker(Bruker bruker, HttpServletResponse res) throws IOException {
+        if (!rep.registrerBruker(bruker)) {
             res.sendError(500, "Feilet i å lagre bruker");
         }
     }
 
     @GetMapping("/krypterAllePassord")
-    public boolean krypterAllePassord(){
+    public boolean krypterAllePassord() {
         return rep.krypterAllePassord();
     }
-
-
-
-
-
-
-
-
 
 
 }

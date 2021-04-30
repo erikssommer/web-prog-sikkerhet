@@ -2,14 +2,14 @@ import validering from "./validering.js"
 
 $(() => {
     $("#loggInn").click(() => {
-        if (validering.loginn()){
-            const url = "/loggInn?brukernavn="+$("#brukernavn").val()
-                +"&passord="+$("#passord").val();
+        if (validering.loginn()) {
+            const url = "/loggInn?brukernavn=" + $("#brukernavn").val()
+                + "&passord=" + $("#passord").val();
 
             $.get(url, OK => {
-                if (OK){
+                if (OK) {
                     window.location.href = "/liste.html";
-                }else {
+                } else {
                     $("#feil").html("Feil i brukernavn eller passord");
                 }
             })
@@ -22,7 +22,7 @@ $(() => {
 
     $("#krypterAllePassord").click(() => {
         $.get("/krypterAllePassord", OK => {
-            if (OK){
+            if (OK) {
                 $("#feil").html("Kryptering fullført!")
             } else {
                 $("#feil").html("Kryptering feilet!")

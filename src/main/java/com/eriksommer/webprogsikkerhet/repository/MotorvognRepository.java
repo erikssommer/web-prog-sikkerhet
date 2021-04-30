@@ -99,38 +99,38 @@ public class MotorvognRepository {
         }
     }
 
-    public boolean loggInn(String brukernavn, String passord){
+    public boolean loggInn(String brukernavn, String passord) {
         String sql = "SELECT * FROM Bruker WHERE brukernavn = ?";
 
         try {
             List<Bruker> list = db.query(sql, new BeanPropertyRowMapper(Bruker.class), brukernavn);
 
-            if (list != null){
-                if (kryptering.sjekkPassord(passord, list.get(0).getPassord())){
+            if (list != null) {
+                if (kryptering.sjekkPassord(passord, list.get(0).getPassord())) {
                     return true;
                 }
             }
             return false;
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error(e.getMessage());
             return false;
         }
     }
 
-    public boolean registrerBruker(Bruker bruker){
+    public boolean registrerBruker(Bruker bruker) {
         String sql = "INSERT INTO Bruker (brukernavn, passord) VALUES (?,?)";
 
         try {
             String kryptertPassord = kryptering.krypterPassord(bruker.getPassord());
             db.update(sql, bruker.getBrukernavn(), kryptertPassord);
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Kunne ikke lagre bruker");
             return false;
         }
     }
 
-    public boolean krypterAllePassord(){
+    public boolean krypterAllePassord() {
         String sql = "SELECT * FROM Bruker";
         String kryptertPassord;
 
@@ -144,27 +144,10 @@ public class MotorvognRepository {
                 db.update(sql, kryptertPassord, bruker.getId());
             }
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error("Klarte ikke å oppdatere alle brukere");
             return false;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
