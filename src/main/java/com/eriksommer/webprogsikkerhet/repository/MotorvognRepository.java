@@ -95,4 +95,85 @@ public class MotorvognRepository {
             return null;
         }
     }
+
+    public boolean loggInn(String brukernavn, String passord){
+        String sql = "SELECT * FROM Bruker WHERE brukernavn = ?";
+
+        try {
+            List<Bruker> list = db.query(sql, new BeanPropertyRowMapper(Bruker.class), brukernavn);
+
+            if (list != null){
+                if (sjekkPassord(passord, list.get(0).getPassord())){
+                    return true;
+                }
+            }
+            return false;
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean sjekkPassord(String passord, String hashPassword){
+        BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder(15);
+
+        return bCrypt.matches(passord, hashPassword);
+    }
+
+    public boolean registrerBruker(Bruker bruker){
+        String sql = "INSERT INTO Bruker (brukernavn, passord) VALUES (?,?)";
+
+        try {
+            String kryptertPassord = krypterPassord(bruker.getPassord());
+            db.update(sql, bruker.getBrukernavn(), kryptertPassord);
+            return true;
+        }catch (Exception e) {
+            logger.error("Kunne ikke lagre bruker");
+            return false;
+        }
+    }
+
+    private String krypterPassord(String passord){
+        BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder(15);
+
+        return bCrypt.encode(passord);
+    }
+
+    public boolean krypterAllePassord(){
+        String sql = "SELECT * FROM Bruker";
+        String kryptertPassord;
+
+        try {
+            List<Bruker> list = db.query(sql, new BeanPropertyRowMapper(Bruker.class));
+
+            for (Bruker bruker : list) {
+                kryptertPassord = krypterPassord(bruker.getPassord());
+
+                sql = "UPDATE Bruker SET passord=? WHERE id=?";
+                db.update(sql, kryptertPassord, bruker.getId());
+            }
+            return true;
+        } catch (Exception e){
+            logger.error("Klarte ikke å oppdatere alle brukere");
+            return false;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
